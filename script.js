@@ -6,6 +6,184 @@
 (function () {
     'use strict';
 
+    // ───── Auth System ─────
+    const AUTH_KEYS = {
+        USERS: 'caloriq_users',
+        SESSION: 'caloriq_session',
+    };
+
+    function hashPassword(password) {
+        let hash = 0;
+        for (let i = 0; i < password.length; i++) {
+            const char = password.charCodeAt(i);
+            hash = ((hash << 5) - hash) + char;
+            hash = hash & hash;
+        }
+        return 'h_' + Math.abs(hash).toString(36) + '_' + password.length;
+    }
+
+    function getUsers() {
+        try {
+            return JSON.parse(localStorage.getItem(AUTH_KEYS.USERS)) || [];
+        } catch (e) {
+            return [];
+        }
+    }
+
+    function saveUsers(users) {
+        localStorage.setItem(AUTH_KEYS.USERS, JSON.stringify(users));
+    }
+
+    function getSession() {
+        return localStorage.getItem(AUTH_KEYS.SESSION);
+    }
+
+    function setSession(email) {
+        localStorage.setItem(AUTH_KEYS.SESSION, email);
+    }
+
+    function clearSession() {
+        localStorage.removeItem(AUTH_KEYS.SESSION);
+    }
+
+    function getLogged_inUser() {
+        const email = getSession();
+        if (!email) return null;
+        const users = getUsers();
+        return users.find(u => u.email === email) || null;
+    }
+
+    function showAuthError(msg) {
+        const el = document.getElementById('auth-error');
+        el.textContent = msg;
+        el.classList.remove('hidden');
+    }
+
+    function hideAuthError() {
+        const el = document.getElementById('auth-error');
+        el.classList.add('hidden');
+    }
+
+    function initAuth(onSuccess) {
+        const authScreen = document.getElementById('auth-screen');
+        const appContainer = document.getElementById('app-container');
+        const formLogin = document.getElementById('form-login');
+        const formSignup = document.getElementById('form-signup');
+        const btnShowSignup = document.getElementById('btn-show-signup');
+        const btnShowLogin = document.getElementById('btn-show-login');
+        const loginWrapper = document.getElementById('login-form-wrapper');
+        const signupWrapper = document.getElementById('signup-form-wrapper');
+        const btnLogout = document.getElementById('btn-logout');
+
+        // Check existing session
+        if (getLogged_inUser()) {
+            authScreen.classList.add('hidden');
+            appContainer.classList.remove('hidden');
+            return true;
+        }
+
+        // Show auth screen
+        authScreen.classList.remove('hidden');
+        appContainer.classList.add('hidden');
+
+        // Toggle forms
+        btnShowSignup.addEventListener('click', () => {
+            hideAuthError();
+            loginWrapper.classList.add('hidden');
+            signupWrapper.classList.remove('hidden');
+        });
+
+        btnShowLogin.addEventListener('click', () => {
+            hideAuthError();
+            signupWrapper.classList.add('hidden');
+            loginWrapper.classList.remove('hidden');
+        });
+
+        // Login
+        formLogin.addEventListener('submit', (e) => {
+            e.preventDefault();
+            hideAuthError();
+            const email = document.getElementById('login-email').value.trim().toLowerCase();
+            const password = document.getElementById('login-password').value;
+
+            if (!email || !password) {
+                showAuthError('Please fill in all fields.');
+                return;
+            }
+
+            const users = getUsers();
+            const user = users.find(u => u.email === email);
+
+            if (!user || user.passwordHash !== hashPassword(password)) {
+                showAuthError('Invalid email or password.');
+                return;
+            }
+
+            setSession(email);
+            authScreen.classList.add('hidden');
+            appContainer.classList.remove('hidden');
+            if (onSuccess) onSuccess();
+        });
+
+        // Signup
+        formSignup.addEventListener('submit', (e) => {
+            e.preventDefault();
+            hideAuthError();
+            const name = document.getElementById('signup-name').value.trim();
+            const email = document.getElementById('signup-email').value.trim().toLowerCase();
+            const password = document.getElementById('signup-password').value;
+            const confirm = document.getElementById('signup-password-confirm').value;
+
+            if (!name || !email || !password || !confirm) {
+                showAuthError('Please fill in all fields.');
+                return;
+            }
+
+            if (password.length < 6) {
+                showAuthError('Password must be at least 6 characters.');
+                return;
+            }
+
+            if (password !== confirm) {
+                showAuthError('Passwords do not match.');
+                return;
+            }
+
+            const users = getUsers();
+            if (users.find(u => u.email === email)) {
+                showAuthError('An account with this email already exists.');
+                return;
+            }
+
+            users.push({ name, email, passwordHash: hashPassword(password) });
+            saveUsers(users);
+            setSession(email);
+
+            // Save user name for the tracker
+            try { localStorage.setItem('caloriq_user_name', name); } catch (e) {}
+
+            authScreen.classList.add('hidden');
+            appContainer.classList.remove('hidden');
+            if (onSuccess) onSuccess();
+        });
+
+        // Logout
+        btnLogout.addEventListener('click', () => {
+            clearSession();
+            authScreen.classList.remove('hidden');
+            appContainer.classList.add('hidden');
+            formLogin.reset();
+            formSignup.reset();
+            hideAuthError();
+            loginWrapper.classList.remove('hidden');
+            signupWrapper.classList.add('hidden');
+        });
+
+        return false;
+    }
+
+    // Run auth first; the main app starts via the onSuccess callback in boot()
+
     // ───── Constants ─────
     const STORAGE_KEYS = {
         ENTRIES: 'caloriq_entries',
@@ -239,11 +417,11 @@
         if (percentage > 100) {
             dom.progressRingFill.classList.add('over');
             dom.progressPercentage.textContent = Math.round(percentage) + '%';
-            dom.progressPercentage.style.background = 'linear-gradient(135deg, #ef4444, #dc2626)';
+            dom.progressPercentage.style.background = 'linear-gradient(135deg, #7c3aed, #581c87)';
         } else {
             dom.progressRingFill.classList.remove('over');
             dom.progressPercentage.textContent = Math.round(percentage) + '%';
-            dom.progressPercentage.style.background = 'linear-gradient(135deg, #f97316, #ef4444, #ec4899)';
+            dom.progressPercentage.style.background = 'linear-gradient(135deg, #c084fc, #a855f7, #7c3aed)';
         }
 
         dom.progressPercentage.style.webkitBackgroundClip = 'text';
@@ -611,7 +789,11 @@
     }
 
     // ───── Init ─────
-    function init() {
+    let appStarted = false;
+
+    function startApp() {
+        if (appStarted) return;
+        appStarted = true;
         loadData();
         setDateDisplay();
         bindEvents();
@@ -635,9 +817,14 @@
     }
 
     // Start the app
+    const boot = () => {
+        const ok = initAuth(startApp);
+        if (ok) startApp();
+    };
+
     if (document.readyState === 'loading') {
-        document.addEventListener('DOMContentLoaded', init);
+        document.addEventListener('DOMContentLoaded', boot);
     } else {
-        init();
+        boot();
     }
 })();
