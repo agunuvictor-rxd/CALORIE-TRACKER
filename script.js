@@ -1,5 +1,6 @@
 /* ===========================
    CaloriQ — Smart Calorie Tracker
+   Modernist Build with Unified Hero & Macro Tracking
    Vanilla JS with localStorage
    =========================== */
 
@@ -55,13 +56,15 @@
 
     function showAuthError(msg) {
         const el = document.getElementById('auth-error');
-        el.textContent = msg;
-        el.classList.remove('hidden');
+        if (el) {
+            el.textContent = msg;
+            el.classList.remove('hidden');
+        }
     }
 
     function hideAuthError() {
         const el = document.getElementById('auth-error');
-        el.classList.add('hidden');
+        if (el) el.classList.add('hidden');
     }
 
     function initAuth(onSuccess) {
@@ -87,102 +90,109 @@
         appContainer.classList.add('hidden');
 
         // Toggle forms
-        btnShowSignup.addEventListener('click', () => {
-            hideAuthError();
-            loginWrapper.classList.add('hidden');
-            signupWrapper.classList.remove('hidden');
-        });
+        if (btnShowSignup) {
+            btnShowSignup.addEventListener('click', () => {
+                hideAuthError();
+                loginWrapper.classList.add('hidden');
+                signupWrapper.classList.remove('hidden');
+            });
+        }
 
-        btnShowLogin.addEventListener('click', () => {
-            hideAuthError();
-            signupWrapper.classList.add('hidden');
-            loginWrapper.classList.remove('hidden');
-        });
+        if (btnShowLogin) {
+            btnShowLogin.addEventListener('click', () => {
+                hideAuthError();
+                signupWrapper.classList.add('hidden');
+                loginWrapper.classList.remove('hidden');
+            });
+        }
 
         // Login
-        formLogin.addEventListener('submit', (e) => {
-            e.preventDefault();
-            hideAuthError();
-            const email = document.getElementById('login-email').value.trim().toLowerCase();
-            const password = document.getElementById('login-password').value;
+        if (formLogin) {
+            formLogin.addEventListener('submit', (e) => {
+                e.preventDefault();
+                hideAuthError();
+                const email = document.getElementById('login-email').value.trim().toLowerCase();
+                const password = document.getElementById('login-password').value;
 
-            if (!email || !password) {
-                showAuthError('Please fill in all fields.');
-                return;
-            }
+                if (!email || !password) {
+                    showAuthError('Please fill in all fields.');
+                    return;
+                }
 
-            const users = getUsers();
-            const user = users.find(u => u.email === email);
+                const users = getUsers();
+                const user = users.find(u => u.email === email);
 
-            if (!user || user.passwordHash !== hashPassword(password)) {
-                showAuthError('Invalid email or password.');
-                return;
-            }
+                if (!user || user.passwordHash !== hashPassword(password)) {
+                    showAuthError('Invalid email or password.');
+                    return;
+                }
 
-            setSession(email);
-            authScreen.classList.add('hidden');
-            appContainer.classList.remove('hidden');
-            if (onSuccess) onSuccess();
-        });
+                setSession(email);
+                authScreen.classList.add('hidden');
+                appContainer.classList.remove('hidden');
+                if (onSuccess) onSuccess();
+            });
+        }
 
         // Signup
-        formSignup.addEventListener('submit', (e) => {
-            e.preventDefault();
-            hideAuthError();
-            const name = document.getElementById('signup-name').value.trim();
-            const email = document.getElementById('signup-email').value.trim().toLowerCase();
-            const password = document.getElementById('signup-password').value;
-            const confirm = document.getElementById('signup-password-confirm').value;
+        if (formSignup) {
+            formSignup.addEventListener('submit', (e) => {
+                e.preventDefault();
+                hideAuthError();
+                const name = document.getElementById('signup-name').value.trim();
+                const email = document.getElementById('signup-email').value.trim().toLowerCase();
+                const password = document.getElementById('signup-password').value;
+                const confirm = document.getElementById('signup-password-confirm').value;
 
-            if (!name || !email || !password || !confirm) {
-                showAuthError('Please fill in all fields.');
-                return;
-            }
+                if (!name || !email || !password || !confirm) {
+                    showAuthError('Please fill in all fields.');
+                    return;
+                }
 
-            if (password.length < 6) {
-                showAuthError('Password must be at least 6 characters.');
-                return;
-            }
+                if (password.length < 6) {
+                    showAuthError('Password must be at least 6 characters.');
+                    return;
+                }
 
-            if (password !== confirm) {
-                showAuthError('Passwords do not match.');
-                return;
-            }
+                if (password !== confirm) {
+                    showAuthError('Passwords do not match.');
+                    return;
+                }
 
-            const users = getUsers();
-            if (users.find(u => u.email === email)) {
-                showAuthError('An account with this email already exists.');
-                return;
-            }
+                const users = getUsers();
+                if (users.find(u => u.email === email)) {
+                    showAuthError('An account with this email already exists.');
+                    return;
+                }
 
-            users.push({ name, email, passwordHash: hashPassword(password) });
-            saveUsers(users);
-            setSession(email);
+                users.push({ name, email, passwordHash: hashPassword(password) });
+                saveUsers(users);
+                setSession(email);
 
-            // Save user name for the tracker
-            try { localStorage.setItem('caloriq_user_name', name); } catch (e) {}
+                try { localStorage.setItem('caloriq_user_name', name); } catch (e) {}
 
-            authScreen.classList.add('hidden');
-            appContainer.classList.remove('hidden');
-            if (onSuccess) onSuccess();
-        });
+                authScreen.classList.add('hidden');
+                appContainer.classList.remove('hidden');
+                if (onSuccess) onSuccess();
+            });
+        }
 
         // Logout
-        btnLogout.addEventListener('click', () => {
-            clearSession();
-            authScreen.classList.remove('hidden');
-            appContainer.classList.add('hidden');
-            formLogin.reset();
-            formSignup.reset();
-            hideAuthError();
-            loginWrapper.classList.remove('hidden');
-            signupWrapper.classList.add('hidden');
-        });
+        if (btnLogout) {
+            btnLogout.addEventListener('click', () => {
+                clearSession();
+                authScreen.classList.remove('hidden');
+                appContainer.classList.add('hidden');
+                if (formLogin) formLogin.reset();
+                if (formSignup) formSignup.reset();
+                hideAuthError();
+                if (loginWrapper) loginWrapper.classList.remove('hidden');
+                if (signupWrapper) signupWrapper.classList.add('hidden');
+            });
+        }
 
         return false;
     }
-
-    // Run auth first; the main app starts via the onSuccess callback in boot()
 
     // ───── Constants ─────
     const STORAGE_KEYS = {
@@ -206,9 +216,16 @@
         totalConsumed: $('total-consumed'),
         totalRemaining: $('total-remaining'),
         dailyGoalDisplay: $('daily-goal-display'),
-        // Progress
+        // Progress Ring
         progressRingFill: $('progress-ring-fill'),
         progressPercentage: $('progress-percentage'),
+        // Macros
+        proteinDisplay: $('macro-protein-display'),
+        carbsDisplay: $('macro-carbs-display'),
+        fatDisplay: $('macro-fat-display'),
+        proteinBar: $('macro-protein-bar'),
+        carbsBar: $('macro-carbs-bar'),
+        fatBar: $('macro-fat-bar'),
         // Meal items
         breakfastItems: $('breakfast-items'),
         lunchItems: $('lunch-items'),
@@ -218,13 +235,18 @@
         lunchCalories: $('lunch-calories'),
         dinnerCalories: $('dinner-calories'),
         snacksCalories: $('snacks-calories'),
-        // Weekly
+        breakfastMacros: $('breakfast-macros'),
+        lunchMacros: $('lunch-macros'),
+        dinnerMacros: $('dinner-macros'),
+        snacksMacros: $('snacks-macros'),
+        // Charts & History
         weeklyChart: $('weekly-chart'),
-        // History
         historyList: $('history-list'),
         emptyHistory: $('empty-history'),
         // Buttons
         btnAddMeal: $('btn-add-meal'),
+        btnHeaderAdd: $('btn-header-add'),
+        fabQuickAdd: $('fab-quick-add'),
         btnSettings: $('btn-settings'),
         btnClearHistory: $('btn-clear-history'),
         // Modals
@@ -265,8 +287,8 @@
 
     function formatFullDate(date) {
         return date.toLocaleDateString('en-US', {
-            weekday: 'long',
-            month: 'long',
+            weekday: 'short',
+            month: 'short',
             day: 'numeric',
             year: 'numeric',
         });
@@ -277,13 +299,14 @@
     }
 
     function animateValue(element, start, end, duration) {
+        if (!element) return;
         const startTime = performance.now();
         const diff = end - start;
 
         function update(currentTime) {
             const elapsed = currentTime - startTime;
             const progress = Math.min(elapsed / duration, 1);
-            const eased = 1 - Math.pow(1 - progress, 3); // ease-out cubic
+            const eased = 1 - Math.pow(1 - progress, 3);
             const current = Math.round(start + diff * eased);
             element.textContent = current.toLocaleString();
             if (progress < 1) {
@@ -295,6 +318,7 @@
     }
 
     function showToast(message) {
+        if (!dom.toast || !dom.toastMessage) return;
         dom.toastMessage.textContent = message;
         dom.toast.classList.add('active');
         setTimeout(() => {
@@ -359,10 +383,16 @@
         return getTodayEntries().reduce((sum, e) => sum + e.calories, 0);
     }
 
-    function getCategoryCaloriesToday(category) {
-        return getTodayEntries()
-            .filter((e) => e.category === category)
-            .reduce((sum, e) => sum + e.calories, 0);
+    function getMacrosToday() {
+        const todayItems = getTodayEntries();
+        return todayItems.reduce(
+            (acc, item) => ({
+                protein: acc.protein + (Number(item.protein) || 0),
+                carbs: acc.carbs + (Number(item.carbs) || 0),
+                fat: acc.fat + (Number(item.fat) || 0),
+            }),
+            { protein: 0, carbs: 0, fat: 0 }
+        );
     }
 
     function getUniqueDates() {
@@ -382,7 +412,7 @@
         return days;
     }
 
-    // ───── Render Stats ─────
+    // ───── Render Stats & Ring ─────
     function renderStats() {
         const consumed = getTotalCaloriesToday();
         const remaining = Math.max(0, dailyGoal - consumed);
@@ -390,25 +420,18 @@
         const prevConsumed = parseInt(dom.totalConsumed.textContent.replace(/,/g, ''), 10) || 0;
         const prevRemaining = parseInt(dom.totalRemaining.textContent.replace(/,/g, ''), 10) || 0;
 
-        animateValue(dom.totalConsumed, prevConsumed, consumed, 600);
-        animateValue(dom.totalRemaining, prevRemaining, remaining, 600);
-        dom.dailyGoalDisplay.textContent = dailyGoal.toLocaleString();
-
-        // Color remaining based on status
-        const statRemainingCard = $('stat-remaining');
-        if (consumed > dailyGoal) {
-            dom.totalRemaining.textContent = '0';
-            statRemainingCard.style.setProperty('--glow', 'rgba(239, 68, 68, 0.15)');
-        }
+        animateValue(dom.totalConsumed, prevConsumed, consumed, 500);
+        animateValue(dom.totalRemaining, prevRemaining, remaining, 500);
+        if (dom.dailyGoalDisplay) dom.dailyGoalDisplay.textContent = dailyGoal.toLocaleString();
     }
 
-    // ───── Render Progress Ring ─────
     function renderProgressRing() {
+        if (!dom.progressRingFill || !dom.progressPercentage) return;
         const consumed = getTotalCaloriesToday();
         const percentage = dailyGoal > 0 ? (consumed / dailyGoal) * 100 : 0;
         const clamped = Math.min(percentage, 100);
 
-        const circumference = 2 * Math.PI * 85; // r = 85
+        const circumference = 2 * Math.PI * 85;
         const offset = circumference - (clamped / 100) * circumference;
 
         dom.progressRingFill.style.strokeDasharray = circumference;
@@ -417,16 +440,32 @@
         if (percentage > 100) {
             dom.progressRingFill.classList.add('over');
             dom.progressPercentage.textContent = Math.round(percentage) + '%';
-            dom.progressPercentage.style.background = 'linear-gradient(135deg, #7c3aed, #581c87)';
         } else {
             dom.progressRingFill.classList.remove('over');
             dom.progressPercentage.textContent = Math.round(percentage) + '%';
-            dom.progressPercentage.style.background = 'linear-gradient(135deg, #c084fc, #a855f7, #7c3aed)';
         }
+    }
 
-        dom.progressPercentage.style.webkitBackgroundClip = 'text';
-        dom.progressPercentage.style.webkitTextFillColor = 'transparent';
-        dom.progressPercentage.style.backgroundClip = 'text';
+    // ───── Render Macros ─────
+    function renderMacros() {
+        const macros = getMacrosToday();
+
+        // Estimated daily targets derived from calorie goal
+        const targetProtein = Math.max(50, Math.round((dailyGoal * 0.25) / 4));
+        const targetCarbs = Math.max(100, Math.round((dailyGoal * 0.50) / 4));
+        const targetFat = Math.max(30, Math.round((dailyGoal * 0.25) / 9));
+
+        if (dom.proteinDisplay) dom.proteinDisplay.textContent = `${macros.protein}g / ${targetProtein}g`;
+        if (dom.carbsDisplay) dom.carbsDisplay.textContent = `${macros.carbs}g / ${targetCarbs}g`;
+        if (dom.fatDisplay) dom.fatDisplay.textContent = `${macros.fat}g / ${targetFat}g`;
+
+        const pPct = Math.min(100, Math.round((macros.protein / targetProtein) * 100));
+        const cPct = Math.min(100, Math.round((macros.carbs / targetCarbs) * 100));
+        const fPct = Math.min(100, Math.round((macros.fat / targetFat) * 100));
+
+        if (dom.proteinBar) dom.proteinBar.style.width = pPct + '%';
+        if (dom.carbsBar) dom.carbsBar.style.width = cPct + '%';
+        if (dom.fatBar) dom.fatBar.style.width = fPct + '%';
     }
 
     // ───── Render Meal Categories ─────
@@ -437,13 +476,19 @@
         categories.forEach((cat) => {
             const itemsContainer = dom[cat + 'Items'];
             const caloriesDisplay = dom[cat + 'Calories'];
+            const macrosDisplay = dom[cat + 'Macros'];
+
             const catEntries = entries.filter((e) => e.date === today && e.category === cat);
             const totalCal = catEntries.reduce((sum, e) => sum + e.calories, 0);
+            const totalProtein = catEntries.reduce((sum, e) => sum + (Number(e.protein) || 0), 0);
 
-            caloriesDisplay.textContent = totalCal + ' kcal';
+            if (caloriesDisplay) caloriesDisplay.textContent = totalCal + ' kcal';
+            if (macrosDisplay) macrosDisplay.textContent = totalProtein > 0 ? `${totalProtein}g protein` : `${catEntries.length} items`;
+
+            if (!itemsContainer) return;
 
             if (catEntries.length === 0) {
-                itemsContainer.innerHTML = '<div class="empty-category">No entries yet</div>';
+                itemsContainer.innerHTML = '<div class="empty-category">No items logged yet</div>';
             } else {
                 itemsContainer.innerHTML = catEntries
                     .map(
@@ -481,11 +526,12 @@
         if (entry.protein) parts.push('P: ' + entry.protein + 'g');
         if (entry.carbs) parts.push('C: ' + entry.carbs + 'g');
         if (entry.fat) parts.push('F: ' + entry.fat + 'g');
-        return parts.length > 0 ? parts.join(' · ') : '';
+        return parts.length > 0 ? parts.join(' · ') : 'No macros entered';
     }
 
     // ───── Render Weekly Chart ─────
     function renderWeeklyChart() {
+        if (!dom.weeklyChart) return;
         const days = getLast7Days();
         const today = getTodayKey();
         const dayNames = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
@@ -524,17 +570,17 @@
 
     // ───── Render History ─────
     function renderHistory() {
-        const dates = getUniqueDates().slice(0, 14); // Last 14 unique days
+        if (!dom.historyList) return;
+        const dates = getUniqueDates().slice(0, 14);
 
         if (dates.length === 0) {
-            dom.emptyHistory.style.display = 'flex';
-            // Remove any history day elements
+            if (dom.emptyHistory) dom.emptyHistory.style.display = 'flex';
             const historyDays = dom.historyList.querySelectorAll('.history-day');
             historyDays.forEach((el) => el.remove());
             return;
         }
 
-        dom.emptyHistory.style.display = 'none';
+        if (dom.emptyHistory) dom.emptyHistory.style.display = 'none';
 
         const html = dates
             .map((dateKey) => {
@@ -564,10 +610,8 @@
             })
             .join('');
 
-        // Keep empty-state element, replace other content
         const existingHistoryDays = dom.historyList.querySelectorAll('.history-day');
         existingHistoryDays.forEach((el) => el.remove());
-
         dom.historyList.insertAdjacentHTML('beforeend', html);
     }
 
@@ -575,9 +619,24 @@
     function renderAll() {
         renderStats();
         renderProgressRing();
+        renderMacros();
         renderMealCategories();
         renderWeeklyChart();
         renderHistory();
+    }
+
+    // ───── Smart Auto-Expand by Time of Day ─────
+    function autoExpandCurrentCategory() {
+        const hour = new Date().getHours();
+        let target = 'breakfast';
+        if (hour >= 11 && hour < 16) target = 'lunch';
+        else if (hour >= 16 && hour < 21) target = 'dinner';
+        else if (hour >= 21 || hour < 5) target = 'snacks';
+
+        const catEl = document.querySelector(`[data-category="${target}"]`);
+        if (catEl && !catEl.classList.contains('expanded')) {
+            catEl.classList.add('expanded');
+        }
     }
 
     // ───── Event: Add Meal ─────
@@ -591,7 +650,7 @@
         const fat = parseInt(dom.inputFat.value, 10) || 0;
 
         if (!name || isNaN(calories) || calories <= 0) {
-            showToast('⚠️ Please fill in food name and calories');
+            showToast('⚠️ Please enter food name and calories');
             return;
         }
 
@@ -610,17 +669,13 @@
         entries.push(entry);
         saveEntries();
 
-        // Reset form
         dom.formAddMeal.reset();
-        selectedCategory = 'breakfast';
-        updateCategoryButtons();
-
         closeModal(dom.modalAddMeal);
         renderAll();
 
-        showToast(`✅ Added "${name}" — ${calories} kcal`);
+        showToast(`✅ Added "${name}" (${calories} kcal)`);
 
-        // Auto-expand the category
+        // Expand the target category
         const catEl = document.querySelector(`[data-category="${entry.category}"]`);
         if (catEl && !catEl.classList.contains('expanded')) {
             catEl.classList.add('expanded');
@@ -656,7 +711,7 @@
 
         closeModal(dom.modalSettings);
         renderAll();
-        showToast('⚙️ Settings saved!');
+        showToast('⚙️ Settings updated!');
     }
 
     // ───── Event: Clear All History ─────
@@ -666,7 +721,7 @@
             return;
         }
 
-        const confirmed = confirm('Are you sure you want to delete ALL entries? This cannot be undone.');
+        const confirmed = confirm('Are you sure you want to clear ALL entries? This action cannot be undone.');
         if (!confirmed) return;
 
         entries = [];
@@ -676,18 +731,27 @@
     }
 
     // ───── Modal Helpers ─────
+    function openMealModalWithCategory(cat) {
+        if (cat) {
+            selectedCategory = cat;
+            updateCategoryButtons();
+        }
+        openModal(dom.modalAddMeal);
+    }
+
     function openModal(modalEl) {
+        if (!modalEl) return;
         modalEl.classList.add('active');
         document.body.style.overflow = 'hidden';
 
-        // Focus first input
         setTimeout(() => {
             const firstInput = modalEl.querySelector('input');
             if (firstInput) firstInput.focus();
-        }, 200);
+        }, 150);
     }
 
     function closeModal(modalEl) {
+        if (!modalEl) return;
         modalEl.classList.remove('active');
         document.body.style.overflow = '';
     }
@@ -707,6 +771,7 @@
 
     // ───── Header Scroll Effect ─────
     function handleScroll() {
+        if (!dom.appHeader) return;
         if (window.scrollY > 10) {
             dom.appHeader.classList.add('scrolled');
         } else {
@@ -716,34 +781,70 @@
 
     // ───── Set Date Display ─────
     function setDateDisplay() {
-        dom.dateDisplay.textContent = formatFullDate(new Date());
+        if (dom.dateDisplay) {
+            dom.dateDisplay.textContent = formatFullDate(new Date());
+        }
+    }
+
+    // ───── Tab Navigation ─────
+    function initTabs() {
+        const tabs = document.querySelectorAll('.segment-tab');
+        const views = document.querySelectorAll('.tab-view');
+
+        tabs.forEach((tab) => {
+            tab.addEventListener('click', () => {
+                const targetViewId = tab.getAttribute('data-tab');
+
+                tabs.forEach((t) => {
+                    t.classList.remove('active');
+                    t.setAttribute('aria-selected', 'false');
+                });
+                views.forEach((v) => v.classList.remove('active'));
+
+                tab.classList.add('active');
+                tab.setAttribute('aria-selected', 'true');
+                const targetView = document.getElementById(targetViewId);
+                if (targetView) targetView.classList.add('active');
+            });
+        });
     }
 
     // ───── Event Bindings ─────
     function bindEvents() {
-        // Open modals
-        dom.btnAddMeal.addEventListener('click', () => {
-            openModal(dom.modalAddMeal);
+        // Quick add buttons
+        if (dom.btnAddMeal) dom.btnAddMeal.addEventListener('click', () => openMealModalWithCategory());
+        if (dom.btnHeaderAdd) dom.btnHeaderAdd.addEventListener('click', () => openMealModalWithCategory());
+        if (dom.fabQuickAdd) dom.fabQuickAdd.addEventListener('click', () => openMealModalWithCategory());
+
+        // Category direct quick-add buttons (+)
+        document.querySelectorAll('.btn-cat-quick-add').forEach((btn) => {
+            btn.addEventListener('click', (e) => {
+                e.stopPropagation();
+                const cat = btn.getAttribute('data-quick-cat');
+                openMealModalWithCategory(cat);
+            });
         });
 
-        dom.btnSettings.addEventListener('click', () => {
-            dom.inputDailyGoal.value = dailyGoal;
-            dom.inputUserName.value = getUserName();
-            openModal(dom.modalSettings);
-        });
+        // Settings modal
+        if (dom.btnSettings) {
+            dom.btnSettings.addEventListener('click', () => {
+                if (dom.inputDailyGoal) dom.inputDailyGoal.value = dailyGoal;
+                if (dom.inputUserName) dom.inputUserName.value = getUserName();
+                openModal(dom.modalSettings);
+            });
+        }
 
         // Close modals
-        dom.btnCloseAddModal.addEventListener('click', () => closeModal(dom.modalAddMeal));
-        dom.btnCloseSettingsModal.addEventListener('click', () => closeModal(dom.modalSettings));
+        if (dom.btnCloseAddModal) dom.btnCloseAddModal.addEventListener('click', () => closeModal(dom.modalAddMeal));
+        if (dom.btnCloseSettingsModal) dom.btnCloseSettingsModal.addEventListener('click', () => closeModal(dom.modalSettings));
 
-        // Close modal on overlay click
         [dom.modalAddMeal, dom.modalSettings].forEach((modal) => {
+            if (!modal) return;
             modal.addEventListener('click', (e) => {
                 if (e.target === modal) closeModal(modal);
             });
         });
 
-        // Close modal on Escape
         document.addEventListener('keydown', (e) => {
             if (e.key === 'Escape') {
                 closeModal(dom.modalAddMeal);
@@ -752,10 +853,10 @@
         });
 
         // Form submissions
-        dom.formAddMeal.addEventListener('submit', handleAddMeal);
-        dom.formSettings.addEventListener('submit', handleSaveSettings);
+        if (dom.formAddMeal) dom.formAddMeal.addEventListener('submit', handleAddMeal);
+        if (dom.formSettings) dom.formSettings.addEventListener('submit', handleSaveSettings);
 
-        // Category button selection
+        // Category modal chips
         document.querySelectorAll('.cat-btn').forEach((btn) => {
             btn.addEventListener('click', () => {
                 selectedCategory = btn.getAttribute('data-cat');
@@ -763,29 +864,36 @@
             });
         });
 
-        // Expand/collapse meal categories
+        // Expand/collapse category cards
         document.querySelectorAll('.category-header').forEach((header) => {
-            header.addEventListener('click', () => {
+            header.addEventListener('click', (e) => {
+                if (e.target.closest('.btn-cat-quick-add')) return;
                 const categoryEl = header.closest('.meal-category');
                 toggleCategory(categoryEl);
             });
         });
 
-        // Delete meal entry (event delegation)
-        document.querySelector('.meal-categories').addEventListener('click', (e) => {
-            const deleteBtn = e.target.closest('.btn-delete-item');
-            if (deleteBtn) {
-                e.stopPropagation();
-                const id = deleteBtn.getAttribute('data-id');
-                handleDeleteEntry(id);
-            }
-        });
+        // Delete meal item delegation
+        const mealContainer = document.getElementById('meal-categories');
+        if (mealContainer) {
+            mealContainer.addEventListener('click', (e) => {
+                const deleteBtn = e.target.closest('.btn-delete-item');
+                if (deleteBtn) {
+                    e.stopPropagation();
+                    const id = deleteBtn.getAttribute('data-id');
+                    handleDeleteEntry(id);
+                }
+            });
+        }
 
         // Clear history
-        dom.btnClearHistory.addEventListener('click', handleClearHistory);
+        if (dom.btnClearHistory) dom.btnClearHistory.addEventListener('click', handleClearHistory);
 
         // Scroll
         window.addEventListener('scroll', handleScroll, { passive: true });
+
+        // Initialize tabs
+        initTabs();
     }
 
     // ───── Init ─────
@@ -798,6 +906,7 @@
         setDateDisplay();
         bindEvents();
         renderAll();
+        autoExpandCurrentCategory();
 
         // Refresh at midnight
         const now = new Date();
@@ -808,7 +917,6 @@
         setTimeout(() => {
             setDateDisplay();
             renderAll();
-            // Then refresh every 24 hours
             setInterval(() => {
                 setDateDisplay();
                 renderAll();
@@ -816,7 +924,7 @@
         }, msUntilMidnight);
     }
 
-    // Start the app
+    // Start
     const boot = () => {
         const ok = initAuth(startApp);
         if (ok) startApp();
