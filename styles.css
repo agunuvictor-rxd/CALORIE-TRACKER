@@ -143,9 +143,11 @@ body {
    =========================== */
 .app-container {
     position: relative;
+    width: 100%;
     max-width: 900px;
     margin: 0 auto;
-    padding: 0 24px 64px;
+    padding: 0 16px 80px;
+    box-sizing: border-box;
 }
 
 .ambient-bg {
@@ -219,23 +221,21 @@ body {
     display: flex;
     align-items: center;
     justify-content: space-between;
-    padding: 20px 0 16px;
+    padding: 16px 0;
     position: sticky;
     top: 0;
     z-index: 50;
     backdrop-filter: blur(16px);
     -webkit-backdrop-filter: blur(16px);
-    background: rgba(246, 248, 251, 0.88);
-    margin: 0 -24px;
-    padding-left: 24px;
-    padding-right: 24px;
+    background: rgba(246, 248, 251, 0.92);
+    width: 100%;
     border-bottom: 1px solid transparent;
     transition: all var(--transition-fast);
 }
 
 .app-header.scrolled {
     border-bottom-color: var(--border-subtle);
-    background: rgba(255, 255, 255, 0.94);
+    background: rgba(255, 255, 255, 0.96);
     box-shadow: 0 4px 16px rgba(15, 23, 42, 0.04);
 }
 
@@ -369,9 +369,10 @@ body {
 
 .hero-main {
     display: grid;
-    grid-template-columns: 210px 1fr;
-    gap: 28px;
+    grid-template-columns: minmax(180px, 210px) 1fr;
+    gap: 24px;
     align-items: center;
+    width: 100%;
 }
 
 /* Progress Gauge Container */
@@ -451,8 +452,9 @@ body {
 /* Metrics Grid */
 .hero-metrics {
     display: grid;
-    grid-template-columns: repeat(3, 1fr);
+    grid-template-columns: repeat(3, minmax(0, 1fr));
     gap: 12px;
+    width: 100%;
 }
 
 .stat-card {
@@ -659,15 +661,17 @@ body {
     gap: 4px;
     width: 100%;
     max-width: 520px;
+    box-sizing: border-box;
 }
 
 .segment-tab {
-    flex: 1;
+    flex: 1 1 0;
+    min-width: 0;
     display: flex;
     align-items: center;
     justify-content: center;
-    gap: 8px;
-    padding: 10px 16px;
+    gap: 6px;
+    padding: 10px 12px;
     border-radius: var(--radius-full);
     border: none;
     background: transparent;
@@ -678,6 +682,7 @@ body {
     cursor: pointer;
     transition: all var(--transition-fast);
     user-select: none;
+    white-space: nowrap;
 }
 
 .segment-tab svg {
@@ -1626,9 +1631,9 @@ body {
     }
 
     .app-header {
-        margin: 0 -20px;
-        padding-left: 20px;
-        padding-right: 20px;
+        margin: 0;
+        padding-left: 0;
+        padding-right: 0;
     }
 
     .hero-main {
@@ -1669,8 +1674,9 @@ body {
     }
 
     .app-header {
-        margin: 0 -14px;
-        padding: 14px 14px;
+        margin: 0;
+        padding-left: 0;
+        padding-right: 0;
     }
 
     .logo-text {
