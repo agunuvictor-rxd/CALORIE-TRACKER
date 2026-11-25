@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" fill="none">
+    <defs>
+        <linearGradient id="caloriq-icon-grad" x1="0" y1="0" x2="32" y2="32" gradientUnits="userSpaceOnUse">
+            <stop offset="0%" stop-color="#38bdf8" />
+            <stop offset="50%" stop-color="#0284c7" />
+            <stop offset="100%" stop-color="#f97316" />
+        </linearGradient>
+    </defs>
+    <circle cx="16" cy="16" r="14" stroke="url(#caloriq-icon-grad)" stroke-width="2.5" />
+    <path d="M16 8 C16 8, 22 13, 22 17 C22 20.3 19.3 23 16 23 C12.7 23 10 20.3 10 17 C10 13 16 8 16 8Z" fill="url(#caloriq-icon-grad)" />
+</svg>
