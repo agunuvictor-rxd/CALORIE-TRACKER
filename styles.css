@@ -102,6 +102,8 @@ html {
     scroll-behavior: smooth;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
+    -webkit-text-size-adjust: 100%;
+    text-size-adjust: 100%;
 }
 
 body {
@@ -111,6 +113,11 @@ body {
     line-height: 1.55;
     overflow-x: hidden;
     min-height: 100vh;
+    min-height: 100dvh;
+    padding-top: env(safe-area-inset-top, 0px);
+    padding-bottom: env(safe-area-inset-bottom, 0px);
+    padding-left: env(safe-area-inset-left, 0px);
+    padding-right: env(safe-area-inset-right, 0px);
 }
 
 /* Scrollbar */
@@ -1207,8 +1214,8 @@ body {
 /* Floating Action Button */
 .fab-quick-add {
     position: fixed;
-    bottom: 28px;
-    right: 28px;
+    bottom: calc(24px + env(safe-area-inset-bottom, 0px));
+    right: calc(24px + env(safe-area-inset-right, 0px));
     width: 56px;
     height: 56px;
     border-radius: var(--radius-full);
@@ -1221,6 +1228,8 @@ body {
     justify-content: center;
     cursor: pointer;
     z-index: 80;
+    touch-action: manipulation;
+    -webkit-tap-highlight-color: transparent;
     transition: all var(--transition-spring);
 }
 
@@ -1347,10 +1356,12 @@ body {
     border-radius: var(--radius-sm);
     color: var(--text-primary);
     font-family: var(--font-family);
-    font-size: 0.94rem;
+    font-size: 1rem; /* Minimum 16px prevents iOS Safari auto-zoom */
     font-weight: 500;
     transition: all var(--transition-fast);
     outline: none;
+    -webkit-appearance: none;
+    appearance: none;
 }
 
 .form-group input::placeholder {
@@ -1580,12 +1591,70 @@ body {
 }
 
 /* ===========================
-   RESPONSIVE
+   RESPONSIVE DESIGN (All Devices: iPhone, Pixel, Galaxy, iPad, Fold)
    =========================== */
+
+/* Touch-optimized tap targets on all touchscreens */
+@media (hover: none) and (pointer: coarse) {
+    .btn-icon,
+    .btn-cat-quick-add,
+    .btn-expand,
+    .btn-delete-item {
+        min-width: 36px;
+        min-height: 36px;
+    }
+
+    .btn-delete-item {
+        opacity: 1 !important; /* Visible on mobile touch without hover */
+    }
+
+    .btn-submit,
+    .btn-add-meal,
+    .btn-header-add {
+        min-height: 44px; /* Apple Human Interface Guideline minimum */
+    }
+
+    .cat-btn {
+        min-height: 42px;
+    }
+}
+
+/* Tablet & iPad (up to 880px) */
+@media (max-width: 880px) {
+    .app-container {
+        padding: 0 20px 72px;
+    }
+
+    .app-header {
+        margin: 0 -20px;
+        padding-left: 20px;
+        padding-right: 20px;
+    }
+
+    .hero-main {
+        grid-template-columns: 200px 1fr;
+        gap: 20px;
+    }
+
+    .stat-value {
+        font-size: 1.45rem;
+    }
+}
+
+/* Compact Tablet & Large Phone (up to 768px) */
 @media (max-width: 768px) {
     .hero-main {
         grid-template-columns: 1fr;
         gap: 20px;
+    }
+
+    .hero-gauge-container {
+        margin: 0 auto;
+    }
+
+    .hero-metrics {
+        grid-template-columns: repeat(3, 1fr);
+        gap: 10px;
     }
 
     .meal-categories-grid {
@@ -1593,60 +1662,191 @@ body {
     }
 }
 
+/* Standard Mobile: iPhone 13/14/15/16, Galaxy S21/S22/S23/S24, Google Pixel (up to 640px) */
 @media (max-width: 640px) {
-    .hero-metrics {
-        grid-template-columns: 1fr;
-        gap: 10px;
-    }
-
-    .hero-macros {
-        grid-template-columns: 1fr;
-        gap: 12px;
-    }
-
-    .stat-card {
-        flex-direction: row;
-        align-items: center;
-        padding: 14px 16px;
-    }
-
-    .stat-num-row {
-        align-items: baseline;
-    }
-
-    .form-row {
-        grid-template-columns: 1fr;
-    }
-
-    .category-selector {
-        grid-template-columns: repeat(2, 1fr);
-    }
-
     .app-container {
-        padding: 0 16px 80px;
+        padding: 0 14px 84px;
     }
 
     .app-header {
-        margin: 0 -16px;
-        padding-left: 16px;
-        padding-right: 16px;
+        margin: 0 -14px;
+        padding: 14px 14px;
+    }
+
+    .logo-text {
+        font-size: 1.35rem;
+    }
+
+    .logo-icon {
+        width: 32px;
+        height: 32px;
     }
 
     .btn-header-add span {
         display: none;
     }
 
+    .btn-header-add {
+        padding: 8px 10px;
+        border-radius: var(--radius-sm);
+    }
+
+    .date-display {
+        font-size: 0.76rem;
+        padding: 6px 10px;
+    }
+
+    /* Hero */
+    .hero-dashboard {
+        padding: 18px 16px;
+        border-radius: var(--radius-md);
+        margin-top: 14px;
+    }
+
+    .progress-ring-container {
+        width: 175px;
+        height: 175px;
+        padding: 6px;
+    }
+
+    .progress-percentage {
+        font-size: 2.1rem;
+    }
+
+    .hero-metrics {
+        grid-template-columns: 1fr;
+        gap: 8px;
+    }
+
+    .stat-card {
+        flex-direction: row;
+        align-items: center;
+        justify-content: space-between;
+        padding: 12px 14px;
+    }
+
+    .stat-info {
+        flex: 1;
+        margin-left: 12px;
+    }
+
+    .stat-num-row {
+        align-items: baseline;
+    }
+
+    .stat-value {
+        font-size: 1.35rem;
+    }
+
+    .hero-macros {
+        grid-template-columns: 1fr;
+        gap: 10px;
+        padding-top: 14px;
+    }
+
+    /* Segment tabs */
+    .segment-control {
+        max-width: 100%;
+    }
+
+    .segment-tab {
+        padding: 9px 8px;
+        gap: 5px;
+    }
+
     .segment-tab span {
-        font-size: 0.78rem;
+        font-size: 0.76rem;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+
+    /* Weekly chart */
+    .weekly-chart {
+        padding: 16px 8px 14px;
+        gap: 6px;
     }
 
     .day-bar-track {
         height: 90px;
     }
+
+    .day-calories {
+        font-size: 0.64rem;
+    }
+
+    .day-label {
+        font-size: 0.65rem;
+    }
+
+    /* Modals on Mobile */
+    .modal {
+        max-height: 94dvh;
+        border-radius: var(--radius-md);
+        margin: auto 0;
+    }
+
+    .modal-header {
+        padding: 18px 20px 0;
+    }
+
+    .modal-body {
+        padding: 18px 20px 24px;
+        gap: 14px;
+    }
+
+    .form-row {
+        grid-template-columns: 1fr;
+        gap: 10px;
+    }
+
+    .category-selector {
+        grid-template-columns: repeat(2, 1fr);
+        gap: 6px;
+    }
+
+    .cat-btn {
+        padding: 10px 8px;
+        font-size: 0.8rem;
+    }
 }
 
-@media (max-width: 420px) {
+/* Small Screens & Foldables (e.g. Galaxy Z Flip outer screen, iPhone SE, smaller Pixels: <= 380px) */
+@media (max-width: 380px) {
     .date-display {
         display: none;
+    }
+
+    .progress-ring-container {
+        width: 155px;
+        height: 155px;
+    }
+
+    .progress-percentage {
+        font-size: 1.85rem;
+    }
+
+    .segment-tab svg {
+        display: none;
+    }
+
+    .segment-tab {
+        padding: 8px 4px;
+        font-size: 0.72rem;
+    }
+
+    .category-icon {
+        width: 38px;
+        height: 38px;
+        font-size: 1.15rem;
+    }
+
+    .category-header {
+        padding: 12px 12px;
+        gap: 8px;
+    }
+
+    .food-item {
+        padding: 10px 12px;
     }
 }
